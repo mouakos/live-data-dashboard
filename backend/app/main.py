@@ -92,6 +92,12 @@ async def websocket_endpoint(
     WebSocket endpoint that keeps the connection open to receive broadcasts.
     Starts sensor data producer when first client connects.
     """
+    origin = ws.headers.get("origin")
+    if origin not in allowed_origins:
+        logger.warning(f"Connection attempt from disallowed origin: {origin}")
+        await ws.close(code=1008)  # Policy Violation
+        return
+
     global producer_task
 
     await manager.connect(ws)
