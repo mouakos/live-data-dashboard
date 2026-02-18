@@ -37,6 +37,23 @@ class ConnectionManager:
         if send_tasks:
             await asyncio.gather(*send_tasks, return_exceptions=True)
 
+    async def close(
+        self, ws: WebSocket, code: int = 1000, reason: str = "normal closure"
+    ) -> None:
+        """Gracefully close a single socket and remove it.
+
+        Args:
+            ws: The WebSocket connection to close.
+            code: WebSocket close code (default 1000 for normal closure).
+            reason: Optional reason for closure.
+        """
+        try:
+            await ws.close(code=code, reason=reason)
+        except Exception:
+            pass
+        finally:
+            self.disconnect(ws)
+
     async def _safe_send(self, ws: WebSocket, payload: dict[str, Any]) -> None:
         try:
             await ws.send_json(payload)

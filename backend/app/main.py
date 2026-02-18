@@ -29,8 +29,10 @@ async def sensor_data_producer() -> None:
                 async with session_maker() as session:
                     data = await sensor_service.generate_sensor_data(session)
 
-                # Broadcast to all connected clients
-                await manager.broadcast_json(data.model_dump(mode="json"))
+                # Broadcast to all connected clients with proper message format
+                await manager.broadcast_json(
+                    {"type": "update", "data": data.model_dump(mode="json")}
+                )
 
             await asyncio.sleep(settings.broadcast_interval_seconds)
     except asyncio.CancelledError:
@@ -77,7 +79,9 @@ async def history(
 
 
 @app.websocket(settings.ws_route)
-async def websocket_endpoint(ws: WebSocket) -> None:
+async def websocket_endpoint(
+    ws: WebSocket, session: AsyncSession = Depends(get_session)
+) -> None:
     """
     WebSocket endpoint that keeps the connection open to receive broadcasts.
     Starts sensor data producer when first client connects.
@@ -91,11 +95,27 @@ async def websocket_endpoint(ws: WebSocket) -> None:
         producer_task = asyncio.create_task(sensor_data_producer())
 
     try:
+        try:
+            snapshot = await sensor_service.get_latest_sensor_data(
+                session, settings.default_snapshot_size
+            )
+            await ws.send_json(
+                {
+                    "type": "snapshot",
+                    "data": [d.model_dump(mode="json") for d in snapshot],
+                }
+            )
+            logger.info(f"Sent snapshot (n={len(snapshot)}) to client.")
+        except Exception as e:
+            logger.warning(f"Failed to send snapshot: {e}")
+            await manager.close(ws, code=1011, reason="Failed to load snapshot")
+            return
+
         while True:
             # We don't expect messages from the client, but reading helps detect disconnects.
             await ws.receive_text()
     except WebSocketDisconnect:
         manager.disconnect(ws)
     except Exception:
-        manager.disconnect(ws)
         logger.exception("WebSocket error")
+        await manager.close(ws, code=1011, reason="Internal error")
