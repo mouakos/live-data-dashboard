@@ -1,15 +1,16 @@
 import asyncio
-
-from app.database import get_session, init_db, session_maker
-from app.logging import setup_logging
-from fastapi import Depends, FastAPI, Query, WebSocket, WebSocketDisconnect
 import logging
+
+from fastapi import Depends, FastAPI, Query, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from sqlmodel.ext.asyncio.session import AsyncSession
+
 from app.config import settings
 from app.connection_manager import manager
+from app.database import get_session, init_db, session_maker
+from app.logging import setup_logging
 from app.models import SensorData
 from app.service import sensor_service
-from sqlmodel.ext.asyncio.session import AsyncSession
 
 setup_logging()
 
@@ -95,24 +96,20 @@ async def websocket_endpoint(
         producer_task = asyncio.create_task(sensor_data_producer())
 
     try:
-        try:
-            snapshot = await sensor_service.get_latest_sensor_data(
-                session, settings.default_snapshot_size
-            )
-            await ws.send_json(
-                {
-                    "type": "snapshot",
-                    "data": [d.model_dump(mode="json") for d in snapshot],
-                }
-            )
-            logger.info(f"Sent snapshot (n={len(snapshot)}) to client.")
-        except Exception as e:
-            logger.warning(f"Failed to send snapshot: {e}")
-            await manager.close(ws, code=1011, reason="Failed to load snapshot")
-            return
+        # Send initial snapshot
+        snapshot = await sensor_service.get_latest_sensor_data(
+            session, settings.default_snapshot_size
+        )
+        await ws.send_json(
+            {
+                "type": "snapshot",
+                "data": [d.model_dump(mode="json") for d in snapshot],
+            }
+        )
+        logger.info(f"Sent snapshot (n={len(snapshot)}) to client.")
 
+        # Keep connection alive and detect disconnects
         while True:
-            # We don't expect messages from the client, but reading helps detect disconnects.
             await ws.receive_text()
     except WebSocketDisconnect:
         manager.disconnect(ws)
