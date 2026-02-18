@@ -35,7 +35,7 @@ docker-compose down
 
 Access:
 - Frontend: http://localhost:3000
-- Backend API: http://localhost:8000/docs
+- Backend API: http://localhost:8000
 
 ### Local Development
 
@@ -49,6 +49,7 @@ pip install -r requirements.txt
 cp .env.template .env  # Edit as needed
 fastapi dev
 ```
+Backend runs on: `http://localhost:800
 
 **Frontend:**
 ```bash
@@ -56,6 +57,8 @@ cd frontend
 npm install
 npm run dev
 ```
+
+Frontend runs on: `http://localhost:5173`
 
 ## 🔌 API Endpoints
 
