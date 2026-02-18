@@ -76,6 +76,11 @@ async def root() -> dict[str, str]:
     }
 
 
+@app.get("/health", response_model=dict[str, str])
+async def health_check() -> dict[str, str]:
+    return {"status": "ok"}
+
+
 @app.get("/history", response_model=list[Reading])
 async def history(
     limit: int = Query(200, ge=1, le=2000), session: AsyncSession = Depends(get_session)
