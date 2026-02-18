@@ -4,4 +4,4 @@ export type SensorReading = {
     humidity: number; // in percentage
 }
 
-export type ConnectionStatus = 'connected' | 'open' | 'closed' | 'error';
+export type ConnectionStatus = 'connecting' | 'open' | 'closed' | 'error';
