@@ -8,7 +8,6 @@ class Config(BaseSettings):
     database_url: str = "sqlite+aiosqlite:///data.db"
     database_echo: bool = Field(default=False)
     broadcast_interval_seconds: float = 1.0
-    memory_window: int = 500
     ws_route: str = "/ws"
     allowed_origins: str
     database_echo: bool = Field(default=False)
