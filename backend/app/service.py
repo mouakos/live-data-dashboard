@@ -1,31 +1,30 @@
-"""Service layer for sensor data operations."""
+"""Service layer for handling reading data operations."""
 
-import random
 
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.models import SensorData
+from app.models import Reading
 
 
-class SensorDataService:
-    """Service class for sensor data operations."""
+class ReadingService:
+    """Service layer for handling reading data operations."""
 
     @staticmethod
-    async def get_latest_sensor_data(
+    async def get_latest_reading(
         session: AsyncSession, limit: int = 200
-    ) -> list[SensorData]:
-        """Fetch the latest sensor data readings from the database.
+    ) -> list[Reading]:
+        """Fetch the latest readings from the database.
 
         Args:
             session: The database session.
             limit: Maximum number of readings to return.
 
         Returns:
-            List of SensorData instances ordered from oldest to newest.
+            List of Reading instances ordered from oldest to newest.
         """
         statement = (
-            select(SensorData).order_by(SensorData.timestamp.desc()).limit(limit)
+            select(Reading).order_by(Reading.timestamp.desc()).limit(limit)
         )
 
         result = await session.exec(statement)
@@ -33,28 +32,26 @@ class SensorDataService:
 
         # Reverse to return oldest to newest
         return list(reversed(readings))
-
+    
     @staticmethod
-    async def generate_sensor_data(session: AsyncSession) -> SensorData:
-        """Generate and save sensor data to the database.
+    async def create_reading(session: AsyncSession, temperature: float, humidity: float) -> Reading:
+        """Create and save a new reading entry to the database.
 
         Args:
             session: The database session.
-
+            temperature: The temperature reading.
+            humidity: The humidity reading.
         Returns:
-            The created SensorData instance.
+            The created Reading instance.
         """
-        temp = round(random.uniform(18.0, 26.0), 1)
-        hum = round(random.uniform(30.0, 65.0), 1)
+        reading = Reading(temperature=temperature, humidity=humidity)
 
-        sensor_data = SensorData(temperature=temp, humidity=hum)
-
-        session.add(sensor_data)
+        session.add(reading)
         await session.commit()
-        await session.refresh(sensor_data)
+        await session.refresh(reading)
 
-        return sensor_data
+        return reading
 
 
 # Create a singleton instance for convenience
-sensor_service = SensorDataService()
+reading_service = ReadingService()

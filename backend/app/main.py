@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import random
 
 from fastapi import Depends, FastAPI, Query, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
@@ -9,8 +10,8 @@ from app.config import settings
 from app.connection_manager import manager
 from app.database import get_session, init_db, session_maker
 from app.logging import setup_logging
-from app.models import SensorData
-from app.service import sensor_service
+from app.models import Reading
+from app.service import reading_service
 
 setup_logging()
 
@@ -28,7 +29,9 @@ async def sensor_data_producer() -> None:
             if manager.count > 0:
                 # Generate and save sensor data
                 async with session_maker() as session:
-                    data = await sensor_service.generate_sensor_data(session)
+                    temp = round(random.uniform(18.0, 26.0), 1)
+                    hum = round(random.uniform(30.0, 65.0), 1)
+                    data = await reading_service.create_reading(session, temp, hum)
 
                 # Broadcast to all connected clients with proper message format
                 await manager.broadcast_json(
@@ -64,17 +67,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.get("/", response_model=dict[str, str])
 async def root() -> dict[str, str]:
     """Root endpoint."""
-    return {"message": "Welcome to the Real-Time Dashboard API! Visit /docs for API documentation."}
+    return {
+        "message": "Welcome to the Real-Time Dashboard API! Visit /docs for API documentation."
+    }
 
-@app.get("/history", response_model=list[SensorData])
+
+@app.get("/history", response_model=list[Reading])
 async def history(
     limit: int = Query(200, ge=1, le=2000), session: AsyncSession = Depends(get_session)
-) -> list[SensorData]:
+) -> list[Reading]:
     """Return the last `limit` readings from the database (oldest→newest)."""
-    return await sensor_service.get_latest_sensor_data(session, limit)
+    return await reading_service.get_latest_reading(session, limit)
 
 
 @app.websocket(settings.ws_route)
@@ -95,7 +102,7 @@ async def websocket_endpoint(
 
     try:
         # Send initial snapshot
-        snapshot = await sensor_service.get_latest_sensor_data(
+        snapshot = await reading_service.get_latest_reading(
             session, settings.default_snapshot_size
         )
         await ws.send_json(
