@@ -64,12 +64,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-@app.get("/health")
-async def health_check() -> dict[str, str]:
-    """Health check endpoint."""
-    return {"status": "ok"}
-
+@app.get("/", response_model=dict[str, str])
+async def root() -> dict[str, str]:
+    """Root endpoint."""
+    return {"message": "Welcome to the Real-Time Dashboard API! Visit /docs for API documentation."}
 
 @app.get("/history", response_model=list[SensorData])
 async def history(
