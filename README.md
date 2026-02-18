@@ -61,20 +61,17 @@ npm run dev
 Frontend runs on: `http://localhost:5173`
 
 ## 🔌 API Endpoints
-
-- `GET /health` - Health check
-- `GET /history?limit=200` - Get historical sensor data
+  
+- `GET /` - API welcome message & health check
+- `GET /docs` - Interactive API documentation (Swagger UI)
 - `WS /ws` - WebSocket for real-time updates
 
 ## ⚙️ Configuration
 
-Backend configuration via `.env` file:
+Create a `.env` file in the `backend/` directory:
 
-```env
-DATABASE_URL=sqlite+aiosqlite:///data.db
-ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000
-BROADCAST_INTERVAL_SECONDS=1.0
-DEFAULT_SNAPSHOT_SIZE=120
+```bash
+cp backend/.env.template backend/.env
 ```
 
 See `.env.template` for all options.
