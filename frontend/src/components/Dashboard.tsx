@@ -3,7 +3,8 @@ import { LiveChart } from "./LiveChart";
 import { StatusBadge } from "./StatusBadge";
 
 export function Dashboard() {
-  const { data, status, lastError, reset, url } = useLiveData();
+  const WINDOW = 120; // show last 120 points initially and keep a rolling window
+  const { data, status, lastError, reset, url } = useLiveData(undefined, WINDOW);
 
   return (
     <div style={{ display: "grid", gap: "1rem" }}>
