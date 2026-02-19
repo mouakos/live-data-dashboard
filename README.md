@@ -39,6 +39,7 @@ A real-time sensor data monitoring dashboard with FastAPI WebSocket backend and 
 - **Python 3.13+**
 - **Node.js 24+** and npm
 - **Docker & Docker Compose** (for containerized deployment)
+- **Git**
 
 ## 🚀 Quick Start
 
