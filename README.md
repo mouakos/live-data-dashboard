@@ -15,50 +15,83 @@ A real-time sensor data monitoring dashboard with FastAPI WebSocket backend and 
 
 ## 🛠️ Tech Stack
 
-**Backend:** FastAPI, WebSocket, SQLModel, SQLite  
-**Frontend:** React, TypeScript, Vite, Recharts
+### Backend
+- **[FastAPI](https://fastapi.tiangolo.com/)** - Modern Python web framework
+- **[WebSocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API)** - Real-time bidirectional communication
+- **[Uvicorn](https://www.uvicorn.org/)** - ASGI server
+- **[Pydantic](https://docs.pydantic.dev/)** - Data validation and settings management
+- **[SQLModel](https://sqlmodel.tiangolo.com/)** - SQL databases with Python type annotations
+- **[SQLite](https://www.sqlite.org/)** - Lightweight embedded database
+
+### Frontend
+- **[React 19](https://react.dev/)** - UI component library
+- **[Recharts](https://recharts.org/)** - Composable charting library for React
+- **[TypeScript](https://www.typescriptlang.org/)** - Type-safe JavaScript
+- **[Vite](https://vitejs.dev/)** - Fast build tool and dev server
+
+### DevOps
+- **[Docker](https://www.docker.com/)** - Containerization platform
+- **[Docker Compose](https://docs.docker.com/compose/)** - Multi-container orchestration
+- **[Nginx](https://nginx.org/)** - Web server for production frontend
+
+## 📋 Prerequisites
+
+- **Python 3.13+**
+- **Node.js 24+** and npm
+- **Docker & Docker Compose** (for containerized deployment)
 
 ## 🚀 Quick Start
 
-### Using Docker (Recommended)
+### 1️⃣ Clone the Repository
 
 ```bash
-# Start all services
-docker-compose up -d
-
-# View logs
-docker-compose logs -f
-
-# Stop services
-docker-compose down
+git clone https://github.com/mouakos/live-data-dashboard.git
+cd live-data-dashboard
 ```
 
-Access:
+### 2️⃣ Using Docker (Recommended)
+
+**Configure environment:**
+```bash
+cp backend/.env.template backend/.env  # Edit as needed
+```
+
+**Start services:**
+```bash
+docker-compose up -d
+```
+
+**Access:**
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:8000
+- API Docs: http://localhost:8000/docs
 
-### Local Development
+**Manage services:**
+```bash
+docker-compose logs -f      # View logs
+docker-compose down         # Stop services
+docker-compose up --build   # Rebuild and start
+```
+
+### 3️⃣ Local Development Setup
 
 **Backend:**
 ```bash
 cd backend
 python -m venv .venv
-.venv\Scripts\activate  # Windows
-source .venv/bin/activate  # macOS/Linux
+.venv\Scripts\activate              # Windows
+# source .venv/bin/activate         # macOS/Linux
 pip install -r requirements.txt
-cp .env.template .env  # Edit as needed
-fastapi dev
+cp .env.template .env               # Configure settings
+fastapi dev                         # Runs on http://localhost:8000
 ```
-Backend runs on: `http://localhost:800
 
-**Frontend:**
+**Frontend (new terminal):**
 ```bash
 cd frontend
 npm install
-npm run dev
+npm run dev                         # Runs on http://localhost:5173
 ```
-
-Frontend runs on: `http://localhost:5173`
 
 ## 🔌 API Endpoints
   
@@ -66,15 +99,6 @@ Frontend runs on: `http://localhost:5173`
 - `GET /docs` - Interactive API documentation (Swagger UI)
 - `WS /ws` - WebSocket for real-time updates
 
-## ⚙️ Configuration
-
-Create a `.env` file in the `backend/` directory:
-
-```bash
-cp backend/.env.template backend/.env
-```
-
-See `.env.template` for all options.
 
 ## 📁 Project Structure
 
@@ -94,13 +118,14 @@ See `.env.template` for all options.
 └── docker-compose.yml
 ```
 
-##  License
+## 📝 License
 
-MIT
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 👨‍💻 Author
+## 👤 Author
 
-[@mouakos](https://github.com/mouakos)
+**Stephane Mouako**
+- GitHub: [@mouakos](https://github.com/mouakos)
 
 ---
 
