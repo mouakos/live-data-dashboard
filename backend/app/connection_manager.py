@@ -74,6 +74,25 @@ class ConnectionManager:
         finally:
             self.disconnect(ws)
 
+    async def close_all(
+        self, code: int = 1001, reason: str = "server shutdown"
+    ) -> None:
+        """Close all active WebSocket connections gracefully.
+
+        Args:
+            code: WebSocket close code (default 1001 for server shutdown).
+            reason: Optional reason for closure.
+        """
+        async with self._lock:
+            close_tasks = []
+            for ws in list(self._connections):
+                close_tasks.append(self.close(ws, code=code, reason=reason))
+            if close_tasks:
+                logger.info(
+                    f"Shutting down; closing {len(close_tasks)} WebSocket(s)..."
+                )
+                await asyncio.gather(*close_tasks, return_exceptions=True)
+
     async def _safe_send(self, ws: WebSocket, payload: dict[str, Any]) -> None:
         """Send JSON payload to a single WebSocket connection, handling errors.
 

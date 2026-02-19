@@ -50,7 +50,8 @@ async def sensor_data_producer() -> None:
 async def lifespan(app: FastAPI):
     """Lifespan function to initialize resources on startup."""
     await init_db()
-    yield  # Run the application
+    yield
+    await manager.close_all()
 
 
 app = FastAPI(title="Real-Time Dashboard API", lifespan=lifespan)
